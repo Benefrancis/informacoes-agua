@@ -10,8 +10,11 @@
   </div>
 </template>
 
+
+
 <script setup lang="ts">
-import {defineProps, computed} from 'vue';
+import { } from "highcharts";
+import { defineProps, computed } from 'vue';
 
 
 interface DataPoint {
@@ -19,16 +22,38 @@ interface DataPoint {
   value: number;
 }
 
+
+
+
 const props = defineProps<{
-  municipio: string;
-  ano: number;
+  municipio: {
+    id: number,
+    nome: string
+  };
+  tempo: {
+    ano: number,
+    semestre: number
+  };
+  ponto: {
+    id: number,
+    nome: string
+  },
+  parametro: {
+    id: number,
+    nome: string
+  }
   data: DataPoint[];
 }>();
 
-const fetchAnalysis = async (year: number, municipio: string, parametro: numero) => {
+fetchAnalysis(tempo.ano, tempo.semestre, municipio.id, parametro.id, ponto.id)
+
+const fetchAnalysis = async (ano: number, semestre: number, municipio: number, parametro: number, ponto: number) => {
   try {
-    //  const response = await axios.get(`/api/analyses/${year}`);
+    const endereco = `/api/informacao?ano=${ano}&semestre=${semestre}&municipio.id=${municipio}&parametro.id=${parametro}&ponto.id=${ponto}`
+    console.log(endereco)
+    const response = await axios.get(endereco);
     // Handle the response data here
+    console.log(response.data)
     // console.log('Analysis data:', response.data);
   } catch (error) {
     console.error('Error fetching analysis data:', error);
@@ -72,11 +97,13 @@ const chartOptions = computed(() => ({
         events: {
           click: function () {
             const municipio = props.municipio
-            const parametro = 123
+            const parametro = props.parametro
+            const tempo = props.tempo
+            const ponto = props.ponto
 
             const year = props.data[this.index].year; // Pega o ano correspondente à coluna
             console.log('Consultando dados do ano: ' + year + ' para o município: ' + municipio);
-            fetchAnalysis(year, municipio, parametro); // Chama a API com o ano
+            fetchAnalysis(tempo.ano, tempo.semestre, municipio.id, parametro.id, ponto.id); // Chama a API com o ano
           },
         },
       },
@@ -93,8 +120,10 @@ const chartOptions = computed(() => ({
   align-items: center;
   width: 450px;
   height: 100%;
-  max-height: 100vh; /* Ensure card doesn't exceed viewport height */
-  max-width: 100vw; /* Ensure card doesn't exceed viewport width */
+  max-height: 100vh;
+  /* Ensure card doesn't exceed viewport height */
+  max-width: 100vw;
+  /* Ensure card doesn't exceed viewport width */
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   padding: 16px;
@@ -123,7 +152,7 @@ const chartOptions = computed(() => ({
 .chart-container {
   width: 100%;
   height: 100%;
-  max-height: 800px; /* Max height for the chart container */
+  max-height: 800px;
+  /* Max height for the chart container */
 }
-
 </style>
