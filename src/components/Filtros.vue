@@ -1,3 +1,121 @@
+<template>
+
+
+    <div class="bg-surface-100 dark:bg-surface-900 items-center justify-center p-5">
+        <section class="bg-white dark:bg-gray-800 rounded-xl flex flex-col gap-20 p-10 w-full h-full max-w-7xl">
+
+            <div class="card">
+                <Accordion :value="['0']" multiple>
+                    <AccordionPanel value="0">
+                        <AccordionHeader>Filtros</AccordionHeader>
+                        <AccordionContent>
+
+
+
+                            <div class="flex flex-wrap gap-2">
+
+                                <Panel header="Ano" class="w-full lg:w-1/4">
+                                    <DatePicker v-model="ano" view="year" dateFormat="yy" placeholder="Ano"
+                                        :minDate="minDate" :maxDate="maxDate" class="w-full" />
+                                </Panel>
+
+                                <Panel header="Semestre" class="w-full lg:w-1/3">
+                                    <Select v-model="semestre" :options="semestres" optionLabel="name" filter
+                                        placeholder="Semestre" :maxSelectedLabels="1" class="w-full" />
+                                </Panel>
+
+                                <Panel header="Estado" class="w-full lg:w-1/3">
+                                    <Select v-model="local" :options="locais" optionLabel="label" filter
+                                        optionGroupLabel="label" optionGroupChildren="items" display="chip"
+                                        placeholder="Selecione o Estado" class="w-full">
+                                        <template #optiongroup="slotProps">
+                                            <div class="flex items-center">
+                                                <img :alt="slotProps.option.label"
+                                                    src="https://primefaces.org/cdn/primevue/images/flag/flag_placeholder.png"
+                                                    :class="`flag flag-br mr-2`" style="width: 18px" />
+                                                <div>{{ slotProps.option.label }}</div>
+                                            </div>
+                                        </template>
+                                    </Select>
+                                </Panel>
+
+                                <Panel header="Município" class="w-full">
+                                    <Select v-model="municipio" :options="municipios" optionLabel="nomeMunicipio" filter
+                                        placeholder="Cidades" :maxSelectedLabels="1" class="w-full" />
+                                </Panel>
+
+                                <Panel header="Parâmetro" class="w-full">
+                                    <MultiSelect v-model="parametro" :options="parametros" optionLabel="descricao"
+                                        filter optionGroupLabel="nome" optionGroupChildren="elementos" display="chip"
+                                        placeholder="Selecione o Parâmetro" class="w-full">
+                                        <template #optiongroup="slotProps">
+                                            <div class="flex items-center">
+                                                <font-awesome-icon :icon="['fas', 'flask']" />
+                                                <div>{{ slotProps.option.nome }}</div>
+                                            </div>
+                                        </template>
+                                    </MultiSelect>
+                                </Panel>
+
+                            </div>
+
+
+
+
+                        </AccordionContent>
+                    </AccordionPanel>
+                    <AccordionPanel value="1">
+                        <AccordionHeader>Gráficos</AccordionHeader>
+                        <AccordionContent>
+
+
+
+
+                            <div class="card flex justify-center">
+
+                                <Chart type="doughnut" :data="chartData" :options="chartOptions"
+                                    class="w-full md:w-[30rem]" />
+                                <Chart type="doughnut" :data="chartData" :options="chartOptions"
+                                    class="w-full md:w-[30rem]" />
+                                <Chart type="doughnut" :data="chartData" :options="chartOptions"
+                                    class="w-full md:w-[30rem]" />
+
+
+                            </div>
+
+
+                        </AccordionContent>
+                    </AccordionPanel>
+                    <AccordionPanel value="2">
+                        <AccordionHeader>Tabela</AccordionHeader>
+                        <AccordionContent>
+                            <p class="m-0">
+                                At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium
+                                voluptatum
+                                deleniti
+                                atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non
+                                provident,
+                                similique
+                                sunt in culpa
+                                qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem
+                                rerum
+                                facilis est et
+                                expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque
+                                nihil
+                                impedit quo minus.
+                            </p>
+                        </AccordionContent>
+                    </AccordionPanel>
+                </Accordion>
+            </div>
+
+
+        </section>
+    </div>
+
+</template>
+
+
 <script lang="ts" setup>
 import { ref, watch, onMounted } from "vue";
 import axios from 'axios';
@@ -141,14 +259,8 @@ const loadParametros = async () => {
         const response = await axios.get(`${URL_API}/api/parametros`);
         let data = response.data;
 
-
-
-
         parametros.value = Object.values(
             data.reduce((acc, item) => {
-
-
-
 
                 if (item.id > 1)
                     if (!acc[item.nome]) {
@@ -176,9 +288,6 @@ const loadParametros = async () => {
 
                 return acc;
 
-
-
-
             }, {} as Record<string, any>) // Tipo do acumulador
         );
     } catch (error) {
@@ -196,68 +305,59 @@ watch(local, (newLocal) => {
 // Chamar a API para carregar parâmetros ao montar o componente
 onMounted(() => {
     loadParametros();
+    chartData.value = setChartData();
+    chartOptions.value = setChartOptions();
 });
+
+const chartData = ref();
+const chartOptions = ref(null);
+
+const setChartData = () => {
+    const documentStyle = getComputedStyle(document.body);
+
+    return {
+        labels: ['A', 'B', 'C'],
+        datasets: [
+            {
+                data: [540, 325, 702],
+                backgroundColor: [documentStyle.getPropertyValue('--p-cyan-500'), documentStyle.getPropertyValue('--p-orange-500'), documentStyle.getPropertyValue('--p-gray-500')],
+                hoverBackgroundColor: [documentStyle.getPropertyValue('--p-cyan-400'), documentStyle.getPropertyValue('--p-orange-400'), documentStyle.getPropertyValue('--p-gray-400')]
+            }
+        ]
+    };
+};
+
+const setChartOptions = () => {
+    const documentStyle = getComputedStyle(document.documentElement);
+    const textColor = documentStyle.getPropertyValue('--p-text-color');
+
+    return {
+        plugins: {
+            legend: {
+                labels: {
+                    cutout: '60%',
+                    color: textColor
+                }
+            }
+        }
+    };
+};
+
+// Expondo as variáveis e métodos que podem ser utilizados externamente
+defineExpose({
+    ano,
+    semestre,
+    local,
+    municipio,
+    parametro,
+    minDate,
+    maxDate,
+    municipios,
+    parametros,
+    locais,
+    semestres,
+    loadMunicipios,
+    loadParametros
+});
+
 </script>
-
-<template>
-    <div class="bg-surface-100 dark:bg-surface-900 items-center justify-center p-5">
-        <section class="bg-white dark:bg-gray-800 rounded-xl flex flex-col gap-20 p-10 w-full h-full max-w-7xl">
-            <h1 class="text-3xl text-black dark:text-white font-bold text-center">Análises Realizadas</h1>
-
-            <div class="flex flex-wrap gap-2">
-                <Panel header="Ano" class="w-full lg:w-1/4">
-                    <DatePicker v-model="ano" view="year" dateFormat="yy" placeholder="Ano" :minDate="minDate"
-                        :maxDate="maxDate" class="w-full" />
-                </Panel>
-
-                <Panel header="Semestre" class="w-full lg:w-1/3">
-                    <Select v-model="semestre" :options="semestres" optionLabel="name" filter placeholder="Semestre"
-                        :maxSelectedLabels="1" class="w-full" />
-                </Panel>
-
-                <Panel header="Estado" class="w-full lg:w-1/3">
-                    <Select v-model="local" :options="locais" optionLabel="label" filter optionGroupLabel="label"
-                        optionGroupChildren="items" display="chip" placeholder="Selecione o Estado" class="w-full">
-                        <template #optiongroup="slotProps">
-                            <div class="flex items-center">
-                                <img :alt="slotProps.option.label"
-                                    src="https://primefaces.org/cdn/primevue/images/flag/flag_placeholder.png"
-                                    :class="`flag flag-br mr-2`" style="width: 18px" />
-                                <div>{{ slotProps.option.label }}</div>
-                            </div>
-                        </template>
-                    </Select>
-                </Panel>
-
-                <Panel header="Município" class="w-full">
-                    <Select v-model="municipio" :options="municipios" optionLabel="nomeMunicipio" filter
-                        placeholder="Cidades" :maxSelectedLabels="1" class="w-full" />
-                </Panel>
-
-                <!-- <Panel header="Parâmetro" class="w-full">
-                    <Select v-model="parametro" :options="parametros" optionLabel="nome" filter placeholder="Parâmetros"
-                        :maxSelectedLabels="1" class="w-full" />
-                </Panel> -->
-
-
-
-                <Panel header="Parâmetro" class="w-full">
-                    <MultiSelect v-model="parametro" :options="parametros" optionLabel="descricao" filter
-                        optionGroupLabel="nome" optionGroupChildren="elementos" display="chip"
-                        placeholder="Selecione o Parâmetro" class="w-full">
-                        <template #optiongroup="slotProps">
-                            <div class="flex items-center">
-                                <!-- <img :alt="slotProps.option.nome"
-                                    src="https://primefaces.org/cdn/primevue/images/flag/flag_placeholder.png"
-                                    :class="`flag flag-br mr-2`" style="width: 18px" /> -->
-                                <div>{{ slotProps.option.nome }}</div>
-                            </div>
-                        </template>
-                    </MultiSelect>
-                </Panel>
-
-
-            </div>
-        </section>
-    </div>
-</template>
