@@ -14,17 +14,17 @@
 
                             <div class="flex flex-wrap gap-2">
 
-                                <Panel header="Ano" class="w-full lg:w-1/4">
+                                <Panel header="Ano" class="w-full lg:w-[20rem]">
                                     <DatePicker v-model="ano" view="year" dateFormat="yy" placeholder="Ano"
                                         :minDate="minDate" :maxDate="maxDate" class="w-full" />
                                 </Panel>
 
-                                <Panel header="Semestre" class="w-full lg:w-1/3">
+                                <Panel header="Semestre" class="w-full lg:w-[25rem]">
                                     <Select v-model="semestre" :options="semestres" optionLabel="name" filter
                                         placeholder="Semestre" :maxSelectedLabels="1" class="w-full" />
                                 </Panel>
 
-                                <Panel header="Estado" class="w-full lg:w-1/3">
+                                <Panel header="Estado" class="w-full lg:w-[23rem]">
                                     <Select v-model="local" :options="locais" optionLabel="label" filter
                                         optionGroupLabel="label" optionGroupChildren="items" display="chip"
                                         placeholder="Selecione o Estado" class="w-full">
@@ -71,17 +71,17 @@
 
 
 
-                            <div class="card flex justify-center">
+                            <div class="card flex justify-center w-full">
 
-                                
+
                                 <Chart type="doughnut" id="grupos" :data="chartData" :options="chartOptions"
-                                    class="w-full md:w-[30rem]" />
-                                
-                                    <Chart type="doughnut" id="parametros" :data="chartData" :options="chartOptions"
-                                    class="w-full md:w-[30rem]" />
-                                
-                                    <Chart type="polarArea" id="polar"  :data="chartData" :options="chartOptions"
-                                    class="w-full md:w-[30rem]" />
+                                    class="w-full" />
+
+                                <Chart type="doughnut" id="parametros" :data="chartData" :options="chartOptions"
+                                    class="w-full" />
+
+                                <Chart type="doughnut" id="polar" :data="chartData" :options="chartOptions"
+                                    class="w-full" />
 
 
                             </div>
