@@ -19,12 +19,12 @@
                                         :minDate="minDate" :maxDate="maxDate" class="w-full" />
                                 </Panel>
 
-                                <Panel header="Semestre" class="w-full lg:w-[25rem]">
+                                <Panel header="Semestre" class="w-full lg:w-[24rem]">
                                     <Select v-model="semestre" :options="semestres" optionLabel="name" filter
                                         placeholder="Semestre" :maxSelectedLabels="1" class="w-full" />
                                 </Panel>
 
-                                <Panel header="Estado" class="w-full lg:w-[23rem]">
+                                <Panel header="Estado" class="w-full lg:w-[23.5rem]">
                                     <Select v-model="local" :options="locais" optionLabel="label" filter
                                         optionGroupLabel="label" optionGroupChildren="items" display="chip"
                                         placeholder="Selecione o Estado" class="w-full">
