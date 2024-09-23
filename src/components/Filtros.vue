@@ -73,11 +73,14 @@
 
                             <div class="card flex justify-center">
 
-                                <Chart type="doughnut" :data="chartData" :options="chartOptions"
+                                
+                                <Chart type="doughnut" id="grupos" :data="chartData" :options="chartOptions"
                                     class="w-full md:w-[30rem]" />
-                                <Chart type="doughnut" :data="chartData" :options="chartOptions"
+                                
+                                    <Chart type="doughnut" id="parametros" :data="chartData" :options="chartOptions"
                                     class="w-full md:w-[30rem]" />
-                                <Chart type="doughnut" :data="chartData" :options="chartOptions"
+                                
+                                    <Chart type="polarArea" id="polar"  :data="chartData" :options="chartOptions"
                                     class="w-full md:w-[30rem]" />
 
 
