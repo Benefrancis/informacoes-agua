@@ -1,37 +1,55 @@
 <template>
   <div id="app">
     <Filtros></Filtros>
+    <div class="card flex justify-center">
+        <Chart type="doughnut" :data="chartData" :options="chartOptions" class="w-full md:w-[30rem]" />
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import Filtros from './components/Filtros.vue'
-const tempo = ref({
-  ano: 2022,
-  semestre: 1
-})
-
-const ponto = ref({})
-
-const municipio = ref({
-  id: 3655,
-  nome: 'Osasco'
-})
-
-const parametro = ref({
-  id: 18475
-})
 
 
 
 onMounted(() => {
-  console.log(`Ano: ${tempo.value.ano}.`)
-  console.log(`Semestre: ${tempo.value.semestre}.`)
-  console.log(`Parametros: ${parametro.value}.`)
-  console.log(`Municipio: ${municipio.value}.`)
-})
+    chartData.value = setChartData();
+    chartOptions.value = setChartOptions();
+});
 
+const chartData = ref();
+const chartOptions = ref(null);
 
+const setChartData = () => {
+    const documentStyle = getComputedStyle(document.body);
+
+    return {
+        labels: ['A', 'B', 'C'],
+        datasets: [
+            {
+                data: [540, 325, 702],
+                backgroundColor: [documentStyle.getPropertyValue('--p-cyan-500'), documentStyle.getPropertyValue('--p-orange-500'), documentStyle.getPropertyValue('--p-gray-500')],
+                hoverBackgroundColor: [documentStyle.getPropertyValue('--p-cyan-400'), documentStyle.getPropertyValue('--p-orange-400'), documentStyle.getPropertyValue('--p-gray-400')]
+            }
+        ]
+    };
+};
+
+const setChartOptions = () => {
+    const documentStyle = getComputedStyle(document.documentElement);
+    const textColor = documentStyle.getPropertyValue('--p-text-color');
+
+    return {
+        plugins: {
+            legend: {
+                labels: {
+                    cutout: '60%',
+                    color: textColor
+                }
+            }
+        }
+    };
+};
 
 </script>
