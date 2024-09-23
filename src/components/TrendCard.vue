@@ -1,115 +1,116 @@
 <template>
   <div class="card">
     <div class="card-header">
-      <h3 class="title">{{ municipio }}</h3>
-      <span class="year">{{ ano }}</span>
+      <h3 class="title">{{ dados.length ? dados[0].municipio.nomeMunicipio : '' }}</h3>
+      <span class="year">{{ props.tempo.ano ? props.tempo.ano - 5 + ' até ' + props.tempo.ano : '' }} </span>
     </div>
     <div class="chart-container">
-      <highcharts :options="chartOptions"></highcharts>
+      <!-- Verificação adicional para garantir que chartData está definido -->
+      <Bar v-if="chartData && chartData.labels && chartData.datasets" :chart-data="chartData" :options="chartOptions">
+      </Bar>
     </div>
   </div>
 </template>
 
-
-
 <script setup lang="ts">
-import { } from "highcharts";
-import { defineProps, computed } from 'vue';
+import { defineProps, ref, watchEffect } from 'vue';
+import { Bar } from 'vue-chartjs';
+import {
+  Chart as ChartJS,
+  Title,
+  Tooltip,
+  Legend,
+  BarElement,
+  CategoryScale,
+  LinearScale
+} from 'chart.js';
 
+import Informacao from "../models/Informacao";
+import Municipio from '../models/Municipio';
+import Tempo from '../models/Tempo';
+import Parametro from '../models/Parametro';
+import Ponto from '../models/Ponto';
 
-interface DataPoint {
-  year: number;
-  value: number;
-}
+// Register necessary components
+ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale);
 
-
-
+const dados = ref<Informacao[]>([]);
 
 const props = defineProps<{
-  municipio: {
-    id: number,
-    nome: string
-  };
-  tempo: {
-    ano: number,
-    semestre: number
-  };
-  ponto: {
-    id: number,
-    nome: string
-  },
-  parametro: {
-    id: number,
-    nome: string
-  }
-  data: DataPoint[];
+  municipio: Municipio,
+  tempo: Tempo,
+  ponto: Ponto,
+  parametro: Parametro
 }>();
 
-fetchAnalysis(tempo.ano, tempo.semestre, municipio.id, parametro.id, ponto.id)
+const fetchData = async () => {
+  const API_URL = `http://localhost/api/informacao`;
 
-const fetchAnalysis = async (ano: number, semestre: number, municipio: number, parametro: number, ponto: number) => {
-  try {
-    const endereco = `/api/informacao?ano=${ano}&semestre=${semestre}&municipio.id=${municipio}&parametro.id=${parametro}&ponto.id=${ponto}`
-    console.log(endereco)
-    const response = await axios.get(endereco);
-    // Handle the response data here
-    console.log(response.data)
-    // console.log('Analysis data:', response.data);
-  } catch (error) {
-    console.error('Error fetching analysis data:', error);
-  }
+  const promises = [];
+
+  let endereco = `${API_URL}`;
+  endereco += props.tempo.ano > 0 ? `?ano=${props.tempo.ano}` : '?ano=';
+  endereco += props.municipio.id > 0 ? `&municipio.id=${props.municipio.id}` : '&municipio.id=';
+  endereco += props.parametro.id > 0 ? `&parametro.id=${props.parametro.id}` : '&parametro.id=';
+  endereco += props.ponto.id > 0 ? `&ponto.id=${props.ponto.id}` : '&ponto.id=';
+  promises.push(fetch(endereco).then(response => response.json()));
+
+  const results = await Promise.all(promises);
+
+  dados.value = results.flat(); // Flatten the results into a single array
 };
 
-const chartOptions = computed(() => ({
-  chart: {
-    type: 'column',
-    options3d: {
-      enabled: true,
-      alpha: 15,
-      beta: 15,
-      depth: 50,
-      viewDistance: 25,
-    },
-    height: '100%',
+watchEffect(async () => {
+  await fetchData();
+});
 
-  },
-  title: {
-    text: 'Últimos 5 anos',
-  },
-  xAxis: {
-    categories: props.data.map(item => item.year.toString()),
-    title: {
-      text: 'Ano',
-    },
-  },
-  yAxis: {
-    title: {
-      text: 'Quantidade de Analises informadas',
-    },
-  },
-  series: [
-    {
-      name: 'Quantidade',
-      data: props.data.map((item) => item.value),
-      type: 'column',
-      colorByPoint: true,
-      point: {
-        events: {
-          click: function () {
-            const municipio = props.municipio
-            const parametro = props.parametro
-            const tempo = props.tempo
-            const ponto = props.ponto
+const chartData = ref({
+  labels: [],
+  datasets: []
+});
 
-            const year = props.data[this.index].year; // Pega o ano correspondente à coluna
-            console.log('Consultando dados do ano: ' + year + ' para o município: ' + municipio);
-            fetchAnalysis(tempo.ano, tempo.semestre, municipio.id, parametro.id, ponto.id); // Chama a API com o ano
-          },
-        },
-      },
+const chartOptions = ref({
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      display: true,
     },
-  ],
-}));
+    title: {
+      display: true,
+      text: 'Últimos 5 anos',
+    }
+  },
+  scales: {
+    x: {
+      title: {
+        display: true,
+        text: 'Ano/Semestre',
+      }
+    },
+    y: {
+      title: {
+        display: true,
+        text: 'Quantidade de Análises informadas',
+      }
+    }
+  }
+});
+
+watchEffect(() => {
+  if (dados.value.length > 0) {
+    chartData.value.labels = [...new Set(dados.value.map((item: Informacao) => item.ano.toString()))];
+    chartData.value.datasets = [
+      {
+        label: 'Quantidade',
+        data: dados.value.map((item: Informacao) => item.analises),
+        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+        borderColor: 'rgba(75, 192, 192, 1)',
+        borderWidth: 1
+      }
+    ];
+  }
+});
 </script>
 
 <style scoped>
@@ -118,12 +119,11 @@ const chartOptions = computed(() => ({
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  width: 450px;
+  width: 100%;
   height: 100%;
   max-height: 100vh;
-  /* Ensure card doesn't exceed viewport height */
-  max-width: 100vw;
-  /* Ensure card doesn't exceed viewport width */
+  min-width: 500px;
+  max-width: 1024px;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   padding: 16px;
@@ -151,8 +151,7 @@ const chartOptions = computed(() => ({
 
 .chart-container {
   width: 100%;
-  height: 100%;
+  height: 450px;
   max-height: 800px;
-  /* Max height for the chart container */
 }
 </style>

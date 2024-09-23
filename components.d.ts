@@ -7,12 +7,9 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    Button: typeof import('primevue/button')['default']
     Grupo: typeof import('./src/components/Grupo.vue')['default']
-    HelloWorld: typeof import('./src/components/HelloWorld.vue')['default']
-    Layout: typeof import('./src/components/Layout.vue')['default']
+    Informacao: typeof import('./src/components/Informacao.vue')['default']
     Parametro: typeof import('./src/components/Parametro.vue')['default']
-    ToggleSwitch: typeof import('primevue/toggleswitch')['default']
     TrendCard: typeof import('./src/components/TrendCard.vue')['default']
   }
 }
